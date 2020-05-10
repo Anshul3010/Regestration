@@ -21,6 +21,7 @@ Router.route('/count').get(authController.protect,authController.roleChecker,Agg
 Router.route('/summery').get(authController.protect,authController.roleChecker,AggPipeline.getSummery);
 Router.route('/updateStudent').patch(authController.protect,authController.roleChecker,student.UpdateStudent);
 Router.route('/updatePassword').patch(authController.protect,authController.roleChecker,authController.UpdatePassword);
+Router.route('/updateFaculty').patch(authController.protect,authController.roleChecker,Faculty.Updatefaculty);
 Router.route('/logout').get(authController.logout);
 
 
