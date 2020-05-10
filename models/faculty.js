@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
-const catchAsync = require('./../utils/catchAsync');
+const catchAsync = require('../utils/catchAsync');
 const bcrypt = require('bcryptjs');
 
-const faculitySchema = new mongoose.Schema({
+const facultySchema = new mongoose.Schema({
     name : {
         type: String,
         required: [true,'please enter a name']
@@ -33,12 +33,12 @@ const faculitySchema = new mongoose.Schema({
     },
     role:{
         type:String,
-        default:'faculity'
+        default:'faculty'
     },
 });
 
 
-faculitySchema.pre('save', async function(next) {
+facultySchema.pre('save', async function(next) {
     if(!this.isModified('password')) {return next()};
 
     this.password = await bcrypt.hash(this.password,12);
@@ -46,7 +46,7 @@ faculitySchema.pre('save', async function(next) {
     next();
 });
 
-faculitySchema.methods.comparePassword = async function(realPassword,enteredPassword){
+facultySchema.methods.comparePassword = async function(realPassword,enteredPassword){
      return await bcrypt.compare(enteredPassword,realPassword);
 };
 
@@ -54,6 +54,6 @@ faculitySchema.methods.comparePassword = async function(realPassword,enteredPass
 
 
 
-const faculityModel = mongoose.model('faculity',faculitySchema);
+const facultyModel = mongoose.model('faculty',facultySchema);
 
-module.exports = faculityModel;
+module.exports = facultyModel;

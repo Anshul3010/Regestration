@@ -1,5 +1,5 @@
 const catchAsync = require('./../utils/catchAsync');
-const Faculity = require('./../models/faculity');
+const Faculty = require('./../models/faculty');
 const AppError = require('./../utils/AppError');
 const jwt = require('jsonwebtoken');
 const Student = require('./../models/student');
@@ -54,7 +54,7 @@ exports.studentLogin =catchAsync(async (req,res,next)=>{
     createSendToken(student, 200, res);
   });
 
-  exports.faculityLogin =catchAsync(async (req,res,next)=>{
+  exports.facultyLogin =catchAsync(async (req,res,next)=>{
     if(req.cookies.jwt){
       return next(new AppError('someone already logged in, please wait for him to logOut',400));
     }
@@ -67,12 +67,12 @@ exports.studentLogin =catchAsync(async (req,res,next)=>{
       }
       // matching the entered username and name from the database
 
-      const faculity = await Faculity.findOne({username : username}).select('+password');
-      if(!faculity || !await faculity.comparePassword(faculity.password,password)){
+      const faculty = await Faculty.findOne({username : username}).select('+password');
+      if(!faculty || !await faculty.comparePassword(faculty.password,password)){
         return next(new AppError('username or password did not match',401));
       }
       let count = 0;
-      if(faculity.role === 'faculity'){
+      if(faculty.role === 'faculty'){
         
         
         const registeredCount = await RegisteredStudents.countDocuments({});
@@ -88,7 +88,7 @@ exports.studentLogin =catchAsync(async (req,res,next)=>{
         
       }
       
-      createSendToken(faculity, 200, res, count);
+      createSendToken(faculty, 200, res, count);
     });
 
 exports.protect = catchAsync(async (req,res,next)=>{
@@ -112,8 +112,8 @@ exports.protect = catchAsync(async (req,res,next)=>{
   // check weather the uswr is deleted or not
 
   const userRole = decoded.role;
-  if(userRole === 'faculity'){
-     user = await Faculity.findById(decoded.id);
+  if(userRole === 'faculty'){
+     user = await Faculty.findById(decoded.id);
 
     if(!user){
       return next(new AppError('sorry we could not identify you please contact the admin',404));
@@ -148,13 +148,13 @@ exports.logout = catchAsync(async (req,res,next)=>{
   res.clearCookie('jwt');
   res.status(200).json({
     status:'success',
-    message:'you have been successfukky logged out'
+    message:'you have been successfully logged out'
   });
 })
 
 exports.checkPayload = catchAsync(async (req,res,next)=>{
 
-  const Cstudent = await Student.findOne({student_no:req.body.student_no});
+  const Cstudent = await Student.findOne({student_no:req.user.student_no});
 
   if(req.body.full_name.toLowerCase() !== Cstudent.full_name.toLowerCase()){
      return next(new AppError('entered data does not matched with the record',400));
@@ -186,6 +186,44 @@ if(req.body.father_name.toLowerCase() !== Cstudent.father_name.toLowerCase()){
   next();
 });
 
+
+exports.checkPayloadDue = catchAsync(async (req,res,next)=>{
+
+  const Cstudent = await Student.findOne({student_no:req.body.student_no});
+
+  if(req.body.full_name.toLowerCase() !== Cstudent.full_name.toLowerCase()){
+     return next(new AppError('entered data does not matched with the record',400));
+}
+  
+  if(req.body.student_no !== Cstudent.student_no){
+  return next(new AppError('entered data does not matched with the record',400));
+}
+  if(req.body.roll_no !== Cstudent.roll_no){
+  return next(new AppError('entered data does not matched with the record',400));
+}
+  if(req.body.branch.toLowerCase() !== Cstudent.branch.toLowerCase()){
+  return next(new AppError('entered data does not matched with the record',400));
+}
+  next();
+});
+
+
+exports.UpdatePassword = catchAsync( async (req,res,next) => {
+
+  const Puser = await Faculty.findOne({username : req.user.username}).select('+password');
+   if (!Puser || ! await Puser.comparePassword(Puser.password,req.body.password)){
+     return next(new AppError('password does not match,please enter correct password',401));
+   }
+   Puser.password = req.body.newPassword;
+   Puser.passwordConfirm = req.body.newPasswordConfirm;
+   await Puser.save();
+   res.clearCookie('jwt');
+   res.status(200).json({
+     status:'success',
+     message:'Password Successfully Changed,Please logIn again'
+   });
+
+})
 
 
 

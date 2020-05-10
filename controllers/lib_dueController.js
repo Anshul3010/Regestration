@@ -7,7 +7,8 @@ exports.createDue =  catchAsync( async (req,res,next)=>{
         roll_no:req.body.roll_no,
         student_no:req.body.student_no,
         full_name:req.body.full_name,
-        due:req.body.lib_due
+        due:req.body.lib_due,
+        branch:req.body.branch
     });
     res.status(200).json({
         status:'success',

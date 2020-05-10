@@ -1,8 +1,8 @@
 const Student = require('./../models/student');
 const catchAsync = require('./../utils/catchAsync');
 const Due = require('./../models/lib_due');
-const Faculity = require('./../models/faculity');
 const ApiFeatures = require('./../utils/ApiFeatures');
+const filterObject = require('./../utils/filterbody');
 
 exports.createStudent = catchAsync(async(req,res,next)=>{
     const student = await Student.create({
@@ -46,6 +46,19 @@ exports.getFilteredStudent = catchAsync( async (req,res,next)=>{
     });
 
 })
+
+exports.UpdateStudent = catchAsync( async (req,res,next) => {
+    const student = await Student.findOne({student_no:req.body.student_no});
+    const filteredObject = filterObject(req.body,'full_name','roll_no','course','branch','email','mobile','father_name','year','semester');
+    const updateStudent = await Student.findByIdAndUpdate(student._id, filteredObject, {
+        new:true,
+        runValidators : true
+    });
+    res.status(200).json({
+        status:'success',
+        data : updateStudent
+    });
+});
 
 
 
